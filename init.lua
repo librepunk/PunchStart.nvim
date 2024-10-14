@@ -8,122 +8,76 @@
 ========         |.-""""""""""""""""""-.|   |-----|          ========
 ========         ||                    ||   | === |          ========
 ========         ||   KICKSTART.NVIM   ||   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||                    ||   |-----|          ========
-========         ||:Tutor              ||   |:::::|          ========
+========         ||         OR         ||   | === |          ========
+========         ||  PunchStart.nvim   ||   |-----|          ========
+========         ||                    ||   |:::::|          ========
 ========         |'-..................-'|   |____o|          ========
 ========         `"")----------------(""`   ___________      ========
 ========        /::::::::::|  |::::::::::\  \ no mouse \     ========
-========       /:::========|  |==hjkl==:::\  \ required \    ========
+========       /:::========|  |========:::\  \ required \    ========
 ========      '""""""""""""'  '""""""""""""'  '""""""""""'   ========
 ========                                                     ========
 =====================================================================
 =====================================================================
 
-What is Kickstart?
+--     NOTE:  for help -> <space>sh for telescope search help
+--    :help lua-guide or https://neovim.io/doc/user/lua-guide.html
+--    https://github.com/nvim-lua/kickstart.nvim/pull/47
+--    https://github.com/nvim-lua/kickstart.nvim/issues/217
 
-  Kickstart.nvim is *not* a distribution.
+--    Git clone this repo to reinstall: 
+--    https://github.com/librepunk/PunchStart.nvim
 
-  Kickstart.nvim is a starting point for your own configuration.
-    The goal is that you can read every line of code, top-to-bottom, understand
-    what your configuration is doing, and modify it to suit your needs.
-
-    Once you've done that, you can start exploring, configuring and tinkering to
-    make Neovim your own! That might mean leaving Kickstart just the way it is for a while
-    or immediately breaking it into modular pieces. It's up to you!
-
-    If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
-      - https://learnxinyminutes.com/docs/lua/
-
-    After understanding a bit more about Lua, you can use `:help lua-guide` as a
-    reference for how Neovim integrates Lua.
-    - :help lua-guide
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
-
-Kickstart Guide:
-
-  TODO: The very first thing you should do is to run the command `:Tutor` in Neovim.
-
-    If you don't know what this means, type the following:
-      - <escape key>
-      - :
-      - Tutor
-      - <enter key>
-
-    (If you already know the Neovim basics, you can skip this step.)
-
-  Once you've completed that, you can continue working through **AND READING** the rest
-  of the kickstart init.lua.
-
-  Next, run AND READ `:help`.
-    This will open up a help window with some basic information
-    about reading, navigating and searching the builtin help documentation.
-
-    This should be the first place you go to look when you're stuck or confused
-    with something. It's one of my favorite Neovim features.
-
-    MOST IMPORTANTLY, we provide a keymap "<space>sh" to [s]earch the [h]elp documentation,
-    which is very useful when you're not exactly sure of what you're looking for.
-
-  I have left several `:help X` comments throughout the init.lua
-    These are hints about where to find more information about the relevant settings,
-    plugins or Neovim features used in Kickstart.
-
-   NOTE: Look for lines like this
-
-    Throughout the file. These are for you, the reader, to help you understand what is happening.
-    Feel free to delete them once you know what you're doing, but they should serve as a guide
-    for when you are first encountering a few different constructs in your Neovim config.
-
-If you experience any errors while trying to install kickstart, run `:checkhealth` for more info.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+--  NOTE: Must map leader before plugins are loaded (otherwise wrong one will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
--- [[ Setting options ]]
--- See `:help vim.opt`
--- NOTE: You can change these options as you wish!
---  For more options, you can see `:help option-list`
+--[[ Setting options ]]
 
--- Make line numbers default
+--
+
+--[[ --{{ Set up working powershell }}--
+--
+--
+vim.opt.shell
+vim.opt.shellcmdflag
+vim.opt.shellredir
+vim.opt.shellpipe
+vim.opt.shellquote
+
+let &shell = executable('pwsh') ? 'pwsh' : 'powershell'
+let &shellcmdflag = '-NoLogo -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.UTF8Encoding]::new();$PSDefaultParameterValues[''Out-File:Encoding'']=''utf8'';Remove-Alias -Force -ErrorAction SilentlyContinue tee;'
+let &shellredir = '2>&1 | %%{ "$_" } | Out-File %s; exit $LastExitCode'
+let &shellpipe  = '2>&1 | %%{ "$_" } | tee %s; exit $LastExitCode'
+set shellquote= shellxquote=
+]]
+--
+
+-- Gui Options:
+vim.opt.guifont = 'MonaspiceRn Nerd Font Mono:calt:1:fina:1:liga:1:ss01:1:ss02:1:ss03:1:ss05:1:ss06:1:ss07:1:ss08:1:ss09:1:size:14'
+-- Visuals
 vim.opt.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
-
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
-
--- Don't show the mode, since it's already in the status line
+vim.opt.relativenumber = true
 vim.opt.showmode = false
-
--- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
+-- Cmp Menus
+vim.opt.wildmode = 'longest:full'
+vim.opt.wildoptions:prepend 'fuzzy'
+-- Mouse
+-- vim.opt.mouse = 'a'
+vim.opt.mouse = ''
+-- Clipboard Syncing -> faster startup
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
 end)
-
 -- Enable break indent
 vim.opt.breakindent = true
-
 -- Save undo history
 vim.opt.undofile = true
-
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -143,9 +97,8 @@ vim.opt.splitright = true
 vim.opt.splitbelow = true
 
 -- Sets how neovim will display certain whitespace characters in the editor.
---  See `:help 'list'`
---  and `:help 'listchars'`
-vim.opt.list = true
+-- vim.opt.list = true
+vim.opt.list = false
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
@@ -155,42 +108,42 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 15
 
--- [[ Basic Keymaps ]]
+-- Tab size , def need it half the default
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.textwidth = 0
+vim.opt.linebreak = true
+vim.opt.cpoptions:append 'c'
+
+--[[ Basic Keymaps ]]
+--
 --  See `:help vim.keymap.set()`
 
 -- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
---
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
+-- Exit terminal -> changed from <C-\><C-n>,
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+-- Split nav (window commands)
+vim.keymap.set('n', '<Left>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<Right>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<Down>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<Up>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Tab nav
+vim.keymap.set('n', '<C-Up>', 'gT', { desc = 'Move to the previous tab' })
+vim.keymap.set('n', '<C-Down>', 'gt', { desc = 'Move to the next tab' })
 
--- [[ Basic Autocommands ]]
+-- not sure what for
+-- vim.keymap.set('n', '', '0cf vim.opt.f=s = ',{})
+
+--[[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
 -- Highlight when yanking (copying) text
@@ -204,7 +157,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- [[ Install `lazy.nvim` plugin manager ]]
+-- {{ Install `lazy.nvim` plugin manager }}
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -216,27 +169,32 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
--- [[ Configure and install plugins ]]
---
+--[[ Configure and install plugins ]]
 --  To check the current status of your plugins, run
 --    :Lazy
---
 --  You can press `?` in this menu for help. Use `:q` to close the window
---
 --  To update plugins you can run
 --    :Lazy update
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
+
+  -- Disable checker cuz i never got wifi
+  checker = {
+    enabled = false,
+    concurrency = nil, ---@type number? set to 1 to check for updates very slowly
+    notify = true, -- get a notification when new updates are found
+    frequency = 3600, -- check for updates every hour
+    check_pinned = false, -- check for pinned packages that can't be updated
+  },
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
-  --
+
   -- Use `opts = {}` to force a plugin to be loaded.
-  --
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -257,19 +215,14 @@ require('lazy').setup({
   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
-  --
-  -- This is often very useful to both group configuration, as well as handle
-  -- lazy loading plugins that don't need to be loaded immediately at startup.
-  --
   -- For example, in the following configuration, we use:
-  --  event = 'VimEnter'
-  --
+  --    event = 'VimEnter'
   -- which loads which-key before all the UI elements are loaded. Events can be
   -- normal autocommands events (`:help autocmd-events`).
-  --
+
   -- Then, because we use the `config` key, the configuration only runs
   -- after the plugin has been loaded:
-  --  config = function() ... end
+  --    config = function() ... end
 
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
@@ -376,7 +329,7 @@ require('lazy').setup({
       -- Telescope picker. This is really useful to discover what Telescope can
       -- do as well as how to actually do it!
 
-      -- [[ Configure Telescope ]]
+      --[[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
@@ -728,19 +681,15 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',
-
-      -- Adds other completion capabilities.
-      --  nvim-cmp does not ship with all sources by default. They are split
-      --  into multiple repos for maintenance purposes.
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
     },
@@ -813,7 +762,6 @@ require('lazy').setup({
         sources = {
           {
             name = 'lazydev',
-            -- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
             group_index = 0,
           },
           { name = 'nvim_lsp' },
@@ -832,32 +780,33 @@ require('lazy').setup({
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     init = function()
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'retrobox'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
+      -- kinda nice cursorline highlight
+      vim.cmd.hi 'CursorLine cterm=bold,italic,underline ctermfg=132 ctermbg=234 gui=bold,italic,underline guifg=#b16286 guibg=#uu0c1c1c'
     end,
   },
 
-  -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  {
+    'folke/todo-comments.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    opts = { signs = false },
+  },
 
-  { -- Collection of various small independent plugins/modules
+  {
+    -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
       -- Better Around/Inside textobjects
-      --
-      -- Examples:
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
       --  - ci'  - [C]hange [I]nside [']quote
       require('mini.ai').setup { n_lines = 500 }
 
       -- Add/delete/replace surroundings (brackets, quotes, etc.)
-      --
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
@@ -878,15 +827,30 @@ require('lazy').setup({
         return '%2l:%-2v'
       end
 
-      -- ... and there is more!
-      --  Check out: https://github.com/echasnovski/mini.nvim
+      -- TODO: Needs work - Laggy scrolling
+      --
+      -- require('mini.animate').setup {}
+      --
+      -- local animate = require 'mini.animate'
+      -- animate.setup {
+      --   scroll = {
+      --     enable = true,
+      --     timing = animate.gen_timing.linear { duration = 40, unit = 'total' },
+      --     subscroll = animate.gen_subscroll.equal { max_output_steps = 120 },
+      --   },
+      -- }
+
+      require('mini.comment').setup {}
+      require('mini.files').setup {}
+      require('mini.misc').setup {}
     end,
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
+    --[[ Configure Treesitter ]]
+    -- See `:help nvim-treesitter`
     opts = {
       ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
@@ -917,23 +881,16 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
-    -- If you are using a Nerd Font: set icons to an empty table which will use the
-    -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
     icons = vim.g.have_nerd_font and {} or {
       cmd = '⌘',
       config = '🛠',
@@ -952,5 +909,244 @@ require('lazy').setup({
   },
 })
 
--- The line beneath this is called `modeline`. See `:help modeline`
+--[[
+gitconfig
+diff.astextplain.textconv=astextplain
+filter.lfs.clean=git-lfs clean -- %f
+filter.lfs.smudge=git-lfs smudge -- %f
+filter.lfs.process=git-lfs filter-process
+filter.lfs.required=true
+http.sslbackend=openssl
+http.sslcainfo=c:/program files/git/mingw64/etc/ssl/certs/ca-bundle.crt
+core.autocrlf=false
+core.fscache=true
+core.symlinks=false
+pull.rebase=false
+credential.helper=manager
+credential.https://dev.azure.com.usehttppath=true
+init.defaultbranch=master
+user.name=leila draghi
+user.email=librepunk@gmail.com
+credential.helper=manager-core
+credential.https://git-codecommit.us-west-2.amazonaws.com.provider=generic
+safe.directory=c:/users/libre/scoop/buckets/java
+core.repositoryformatversion=0
+core.filemode=false
+core.bare=false
+core.logallrefupdates=true
+core.symlinks=false
+core.ignorecase=true
+remote.origin.url=https://github.com/librepunk/PunchStart.nvim.git
+remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+branch.master.remote=origin
+branch.master.merge=refs/heads/master
+branch.master.vscode-merge-base=origin/master
+
+Yazi toml
+# A TOML linter such as https://taplo.tamasfe.dev/ can use this schema to validate your config.
+# If you encounter any issues, please make an issue at https://github.com/yazi-rs/schemas.
+"$schema" = "https://yazi-rs.github.io/schemas/yazi.json"
+
+[manager]
+ratio          = [ 1, 4, 3 ]
+sort_by        = "extension"
+sort_sensitive = false
+sort_reverse 	 = false
+sort_dir_first = true
+sort_translit  = false
+linemode       = "mtime"
+show_hidden    = true
+show_symlink   = true
+scrolloff      = 5
+mouse_events   = [ "click", "scroll" ]
+title_format   = "Yazi: {cwd}"
+
+[preview]
+wrap            = "no"
+tab_size        = 2
+max_width       = 600
+max_height      = 900
+cache_dir       = ""
+image_delay     = 30
+image_filter    = "triangle"
+image_quality   = 75
+sixel_fraction  = 15
+ueberzug_scale  = 1
+ueberzug_offset = [ 0, 0, 0, 0 ]
+
+[opener]
+edit = [
+	{ run = "wezterm cli split-pane --right nvim %*",	block = true,	desc = "split right nvim",	for = "windows" },
+	{ run = "wezterm cli split-pane nvim %*",	block = true,	desc = "split below nvim",	for = "windows" },
+	{ run = "nvim %*",	block = true,	desc = "nvim",	for = "windows" },
+	{ run = 'neovide %*',    orphan = true, desc = "Neovide",           for = "windows" },
+	{ run = '${EDITOR:-vi} "$@"',  block = true, for = "unix" },
+]
+open = [
+	{ run = 'start "$@"', 						desc = "Open", for = "windows"},
+]
+reveal = [
+	{ run = "glow %*",	block = true,	desc = "Markdown",	for = "windows" },
+	{ run = 'explorer /select,"%1"', orphan = true, desc = "Reveal", for = "windows" },
+]
+extract = [
+	{ run = 'ya pub extract --list %*',   desc = "Extract here", for = "windows" },
+]
+play = [
+	{ run = '"mpvnet.exe" %*', orphan = true, for = "windows" },
+	{ run = 'mpv --force-window %*', orphan = true, for = "windows" },
+]
+
+[open]
+rules = [
+	# Folder
+	{ name = "*/", use = [ "edit", "open", "reveal" ] },
+	# Text
+	{ mime = "text/*", use = [ "edit", "reveal" ] },
+	# Markdown
+	{ mime = "text/md", use = [ "reveal", "edit" ] },
+	# Image
+	{ mime = "image/*", use = [ "open", "reveal" ] },
+	# Media
+	{ mime = "{audio,video}/*", use = [ "play", "reveal" ] },
+	# Archive
+	{ mime = "application/{,g}zip", use = [ "extract", "reveal" ] },
+	{ mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", use = [ "extract", "reveal" ] },
+	# JSON
+	{ mime = "application/{json,x-ndjson}", use = [ "edit", "reveal" ] },
+	{ mime = "*/javascript", use = [ "edit", "reveal" ] },
+	# Empty file
+	{ mime = "inode/x-empty", use = [ "edit", "reveal" ] },
+	# Fallback
+	{ name = "*", use = [ "edit", "open", "reveal" ] },
+]
+
+[tasks]
+micro_workers    = 10
+macro_workers    = 25
+bizarre_retry    = 5
+image_alloc      = 536870912  # 512MB
+image_bound      = [ 0, 0 ]
+suppress_preload = false
+
+[plugin]
+
+fetchers = [
+	# Mimetype
+	{ id = "mime", name = "*", run = "mime", if = "!mime", prio = "high" },
+]
+preloaders = [
+	# Image
+	{ mime = "image/{avif,hei?,jxl,svg+xml}", run = "magick" },
+	{ mime = "image/*", run = "image" },
+	# Video
+	{ mime = "video/*", run = "video" },
+	# PDF
+	{ mime = "application/pdf", run = "pdf" },
+	# Font
+	{ mime = "font/*", run = "font" },
+	{ mime = "application/vnd.ms-opentype", run = "font" },
+]
+previewers = [
+	{ name = "*/", run = "folder", sync = true },
+	# Code
+	{ mime = "text/*", run = "code" },
+	{ mime = "*/{xml,javascript,x-wine-extension-ini}", run = "code" },
+	# JSON
+	{ mime = "application/{json,x-ndjson}", run = "json" },
+	# Image
+	{ mime = "image/{avif,hei?,jxl,svg+xml}", run = "magick" },
+	{ mime = "image/*", run = "image" },
+	# Video
+	{ mime = "video/*", run = "video" },
+	# PDF
+	{ mime = "application/pdf", run = "pdf" },
+	# Archive
+	{ mime = "application/{,g}zip", run = "archive" },
+	{ mime = "application/x-{tar,bzip*,7z-compressed,xz,rar,iso9660-image}", run = "archive" },
+	# Font
+	{ mime = "font/*", run = "font" },
+	{ mime = "application/vnd.ms-opentype", run = "font" },
+	# Empty file
+	{ mime = "inode/x-empty", run = "empty" },
+	# Fallback
+	{ name = "*", run = "file" },
+]
+
+[input]
+cursor_blink = false
+
+# cd
+cd_title  = "Change directory:"
+cd_origin = "top-center"
+cd_offset = [ 0, 2, 50, 3 ]
+
+# create
+create_title  = "Create:"
+create_origin = "top-center"
+create_offset = [ 0, 2, 50, 3 ]
+
+# rename
+rename_title  = "Rename:"
+rename_origin = "hovered"
+rename_offset = [ 0, 1, 50, 3 ]
+
+# filter
+filter_title  = "Filter:"
+filter_origin = "top-center"
+filter_offset = [ 0, 2, 50, 3 ]
+
+# find
+find_title  = [ "Find next:", "Find previous:" ]
+find_origin = "top-center"
+find_offset = [ 0, 2, 50, 3 ]
+
+# search
+search_title  = "Search via {n}:"
+search_origin = "top-center"
+search_offset = [ 0, 2, 50, 3 ]
+
+# shell
+shell_title  = [ "Shell:", "Shell (block):" ]
+shell_origin = "top-center"
+shell_offset = [ 0, 2, 50, 3 ]
+
+[confirm]
+# trash
+trash_title 	= "Trash {n} selected file{s}?"
+trash_origin	= "center"
+trash_offset	= [ 0, 0, 70, 20 ]
+
+# delete
+delete_title 	= "Permanently delete {n} selected file{s}?"
+delete_origin	= "center"
+delete_offset	= [ 0, 0, 70, 20 ]
+
+# overwrite
+overwrite_title   = "Overwrite file?"
+overwrite_content = "Will overwrite the following file:"
+overwrite_origin  = "center"
+overwrite_offset  = [ 0, 0, 50, 15 ]
+
+# quit
+quit_title   = "Quit?"
+quit_content = "The following task is still running, are you sure you want to quit?"
+quit_origin  = "center"
+quit_offset  = [ 0, 0, 50, 15 ]
+
+[select]
+open_title  = "Open with:"
+open_origin = "hovered"
+open_offset = [ 0, 1, 50, 7 ]
+
+[which]
+sort_by      	 = "none"
+sort_sensitive = false
+sort_reverse 	 = false
+sort_translit  = false
+
+[log]
+enabled = false
+--]]
+
 -- vim: ts=2 sts=2 sw=2 et
