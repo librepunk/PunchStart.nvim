@@ -1,0 +1,18 @@
+-- Example Plugin File
+
+return {
+  '[git]/[repo]',
+  -- version = '*',
+  -- dependencies = {
+  --     '[git]/[repo]'
+  -- },
+  -- cmd = '',
+  -- keys = {
+  -- },
+  -- or
+  -- opts = {
+  --       map()
+  -- },
+}
+
+-- vi:ft=lua
